@@ -8,6 +8,7 @@ let bj = {
   hphand : null, // player hand
   hpcon : null, // player controls
 
+
   // GAME FLAGS
   deck : [], // The current deck of cards
   dealer : [], // The dealer's current hand
@@ -18,6 +19,9 @@ let bj = {
   dstand : false, // Dealer has stood
   pstand : false, // Player has stood
   turn : 0, // Who's turn now? 0 for player, 1 for dealer (computer)
+  player_money : 200 ,
+
+
 
   //INITIALIZE GAME
   init : function () {
@@ -29,6 +33,8 @@ let bj = {
     bj.hppoints = document.getElementById("play-points");
     bj.hphand = document.getElementById("play-cards");
     bj.hpcon = document.getElementById("play-control");
+    bj.bet = document.getElementById('bet');
+    document.getElementById("player-money").innerHTML = "Your money: $" +bj.player_money ;
 
     //ONCLICK EVENTS
     document.getElementById("playc-start").addEventListener("click", bj.start);
@@ -42,6 +48,8 @@ let bj = {
     bj.deck = [];  bj.dealer = [];  bj.player = [];
     bj.dpoints = 0;  bj.ppoints = 0;
     bj.dstand = false;  bj.pstand = false;
+
+    bj.bet.innerHTML = 100 + ' $' ;
     bj.hdpoints.innerHTML = "?"; bj.hppoints.innerHTML = 0;
     bj.hdhand.innerHTML = ""; bj.hphand.innerHTML = "";
     bj.hdstand.classList.remove("stood");
@@ -103,6 +111,20 @@ let bj = {
     }
   },
 
+bets: function(outcome) {
+    let playerBet = document.getElementById("bet").valueAsNumber;
+    if (outcome === "win") {
+        bj.player_money += playerBet;
+
+
+    }
+    if (outcome === "lose") {
+       bj.player_money -= playerBet;
+
+    }
+ },
+
+
   //CALCULATE AND UPDATE POINTS
   points : function () {
     //RUN THROUGH CARDS
@@ -135,6 +157,8 @@ let bj = {
     }
   },
 
+
+
   // (F) CHECK FOR WINNERS (AND LOSERS)
   check : function () {
     // FLAGS
@@ -149,11 +173,17 @@ let bj = {
       }
       // PLAYER WINS
       if (winner==null && bj.ppoints==21) {
+        bj.bets('win')
+        document.getElementById("player-money").innerHTML = "Your money: $" +bj.player_money ;
         winner = 0; message = "Player wins with a Blackjack!";
+
       }
       // DEALER WINS
       if (winner==null && bj.dpoints==21) {
+        bj.bets('lose')
+        document.getElementById("player-money").innerHTML = "Your money: $" +bj.player_money ;
         winner = 1; message = "Dealer wins with a Blackjack!";
+
       }
     }
 
@@ -161,11 +191,15 @@ let bj = {
     if (winner == null) {
       // PLAYER GONE BUST
       if (bj.ppoints>21) {
-        winner = 1; message = "Player has gone bust - Dealer wins!";
+        bj.bets('lose')
+        document.getElementById("player-money").innerHTML = "Your money: $" +bj.player_money ;
+        winner = 1; message = "Player has gone bust - Dealer wins!" ;
       }
       // DEALER GONE BUST
       if (bj.dpoints>21) {
-        winner = 0; message = "Dealer has gone bust - Player wins!";
+        bj.bets('win')
+        document.getElementById("player-money").innerHTML = "Your money: $" +bj.player_money ;
+        winner = 0; message = "Dealer has gone bust - Player wins!" ;
       }
     }
 
@@ -173,11 +207,15 @@ let bj = {
     if (winner == null && bj.dstand && bj.pstand) {
       // DEALER HAS MORE POINTS
       if (bj.dpoints > bj.ppoints) {
-        winner = 1; message = "Dealer wins with " + bj.dpoints + " points!";
+        bj.bets('lose')
+        document.getElementById("player-money").innerHTML = "Your money: $" +bj.player_money ;
+        winner = 1; message = "Dealer wins with " + bj.dpoints + " points!" ;
       }
       // PLAYER HAS MORE POINTS
       else if (bj.dpoints < bj.ppoints) {
-        winner = 0; message = "Player wins with " + bj.ppoints + " points!";
+        bj.bets('win')
+        document.getElementById("player-money").innerHTML = "Your money: $" +bj.player_money ;
+        winner = 0; message = "Player wins with " + bj.ppoints + " points!" ;
       }
       // TIE
       else {
@@ -197,8 +235,11 @@ let bj = {
       // WINNER IS...
       alert(message);
     }
+
     return winner;
   },
+
+
 
   //HIT A NEW CARD
   hit : function () {
@@ -259,3 +300,9 @@ let bj = {
   }}
 };
 window.addEventListener("DOMContentLoaded", bj.init);
+
+function togglePlay() {
+  var myAudio = document.getElementById("myAudio");
+  myAudio.volume = 0.6;
+  return myAudio.paused ? myAudio.play() : myAudio.pause();
+}
